@@ -1,101 +1,75 @@
+// ф*к мой мозг
 module.exports = function solveSudoku(matrix) {
-    return solved(matrix, 0, 0);
-}
-
-function solved(init, row, col){
-    if (row === 9) return init;
-
-    if (init[row][col] === 0) {
-        let aSolv = [];
-        aSolv.push(Secvals(init, row, col));
-        aSolv.push(Rowsval(init[row]));
-        aSolv.push(Colvals(init, col));
-
-        let solve = getSolved(aSolv);
-        for (let i = 0, length = solve.length; i < length; i++) {
-            init[row][col] = solve[i];
-            if (col === 8) {
-                if (solved(init, row + 1, 0))      return init;
-            } else if (solved(init, row, col + 1)) return init;
-            init[row][col] = 0;
-        }
-
-    } else {
-        if (col === 8) {
-            if (solved(init, row + 1, 0))   return init;
-        } else {
-            if (solved(init, row, col + 1)) return init;
-            }
-        }
-        return false;
-}
-
-function getSolved(arrSolved) {
-    arrSolved.sort(function(a,b){
-        return a.length - b.length;
-    });
-    let value = [];
-    arrSolved[0].map(function(elem) {
-        if ((arrSolved[0].indexOf(elem) >= 0) && (arrSolved[1].indexOf(elem) >= 0) && (arrSolved[2].indexOf(elem) >= 0)) {
-            value.push(elem);
-        }
-    });
-    if (value.length !== 0) return value;
-    return 0;
-}
-function Secvals(init, row, col) {
-    let set = new Set();
-    let rowPos, colPos = 0, value = [];
-
-    if      (row === 0 || row === 1 || row === 2){        rowPos = 0;    }
-    else if (row === 3 || row === 4 || row === 5) {        rowPos = 3;    }
-    else {        rowPos = 6;    }
-
-    if      (col === 0 || col === 1 || col === 2){        colPos = 0;    }
-    else if (col === 3 || col === 4 || col === 5) {        colPos = 3;    }
-    else {        colPos = 6;    }
-
-    for (let i = rowPos; i < rowPos + 3; i++) {
-        for (let j = colPos; j < colPos + 3; j++) {
-            if (init[i][j] !== 0) {
-                set.add(init[i][j]);
+    let solv_arr = matrix;
+    if (solved(matrix)) {
+        for (let i = 0; i < 9; i++) {
+            for (let y = 0; y < 9; y++) {
+                solv_arr[i][y] = matrix[i][y];
             }
         }
     }
-    for ( let i = 1; i <= 9; i++) {
-        if (!(set.has(i))) {
-            value.push(i);
+    return solv_arr;
+}
+function solved(arr) {
+    let l = [0, 0];
+
+    if (empty_loc(arr, l)) return true;
+    let row = l[0];
+    let col = l[1];
+    
+    for (let num = 1; num < 10; num++){
+        if (loc_is_ok(arr, row, col, num)){
+            arr[row][col] = num;
+            if (solved(arr)) return true;
+            arr[row][col] = 0;
         }
     }
-    return value;
+    return false;
+}
+// проверка на отсутсвие в строке, столбце и боксе
+function loc_is_ok(arr, row, col, num){
+    return in_row(arr, row, num) && in_col(arr, col, num) && in_box(arr, row - row % 3, col - col % 3, num);
+}
+// 0?
+function empty_loc(arr, l) {
+    for (let row = 0; row < 9; row++){
+        for (let col = 0; col < 9; col++){
+            if (arr[row][col] === 0){
+                l[0] = row;
+                l[1] = col;
+                return false;
+            }
+        }
+    }
+    return true;
+}
+// проверки:..
+function in_row(arr, row, num) {
+    for (let i = 0; i < 9; i++){
+        if (arr[row][i] === num){
+            return false;
+        }
+    }
+    return true;
 }
 
-function Rowsval(row) {
-    let set = new Set();
-    let value = [];
-    for (let i = 0; i < row.length; i++) {
-        if (row[i] !== 0) {
-            set.add(row[i]);        }
+function in_col(arr, col, num) {
+    for (let y = 0; y < 9; y++){
+        if (arr[y][col] === num){
+            return false;
+        }
     }
-    for (let i = 1; i <= 9; i++) {
-        if (!(set.has(i))) {
-            value.push(i);        }
-    }
-    return value;
+    return true;
 }
 
-function Colvals(initial, col) {
-    let set = new Set();
-    let value = [];
-    for (let i = 0; i < initial.length; i++) {
-        if (initial[i][col] !== 0) {
-            set.add(initial[i][col]);
+function in_box(arr, row, col, num) {
+    for (let i = 0; i < 3; i++){
+        for (let y = 0; y < 3; y++){
+            if (arr[i + row][y + col] === num){
+                return false;
+            }
         }
     }
-    for ( let i = 1; i <= 9; i++) {
-        if (!(set.has(i))) {
-            value.push(i);
-        }
-    }
-    return value;
+    return true;
 }
+// спасибо!
